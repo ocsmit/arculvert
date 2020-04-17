@@ -48,3 +48,14 @@ def create_flow_direction(workspace):
     flow = arcpy.sa.FlowDirection(raster, flow_direction_type='D8')
     flow.save(out_file)
 
+def create_flow_accumulation(workspace):
+
+    arcpy.env.addOutputsToMap = False
+    arcpy.env.overwriteOutput = True
+
+    in_file = '%s/%s' % (workspace, 'FlowDirection.tif')
+    raster = arcpy.Raster(os.path.abspath(in_file))
+    out_file = '%s/%s' % (workspace, 'FlowAccumulation.tif')
+    accum = arcpy.sa.FlowAccumulation(in_file, data_type='INTEGER',
+                                      flow_direction_type='D8')
+    accum.save(out_file)
