@@ -13,5 +13,5 @@ def create_GDB(out_folder, gdb_name):
         gdb = '%s%s' % (gdb_name, '.gdb')
     else:
         gdb = gdb_name
-    gdb_path = os.path.join(out_folder, gdb)
+    gdb_path = os.path.join(os.path.abspath(out_folder), gdb)
     return gdb_path
