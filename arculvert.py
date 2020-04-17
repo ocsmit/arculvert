@@ -4,13 +4,15 @@
 # Author: Owen Smith
 ################################################################################
 
-import arcpy
 import os
-
+from glob import glob
+import arcpy
 
 def process_dem(workspace, dem_path, mask=None,
                 masked_raster_name='masked_dem'):
     arcpy.env.addOutputsToMap = False
+    arcpy.env.overwriteOutput = True
+
     if not os.path.exists(workspace):
         os.mkdir(workspace)
     raster = arcpy.Raster(dem_path)
@@ -35,4 +37,14 @@ def process_dem(workspace, dem_path, mask=None,
     return dem
 
 
+def create_flow_direction(workspace):
+
+    arcpy.env.addOutputsToMap = False
+    arcpy.env.overwriteOutput = True
+
+    in_file = '%s/%s' % (workspace, 'fdem_*.tif')
+    raster = arcpy.Raster(os.path.abspath(glob(in_file)[0]))
+    out_file = '%s/%s' % (workspace, 'FlowDirection.tif')
+    flow = arcpy.sa.FlowDirection(raster, flow_direction_type='D8')
+    flow.save(out_file)
 
