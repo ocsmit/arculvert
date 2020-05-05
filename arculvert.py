@@ -8,6 +8,7 @@ import os
 from glob import glob
 import arcpy
 
+
 def process_dem(workspace, dem_path, mask=None,
                 masked_raster_name='masked_dem'):
     arcpy.env.addOutputsToMap = False
@@ -60,6 +61,18 @@ def create_flow_accumulation(workspace):
     accum.save(out_file)
 
 
+def reclass_flow(workspace):
+
+    arcpy.env.addOutputsToMap = False
+    arcpy.env.overwriteOutput = True
+
+    in_file = '%s/%s' % (workspace, 'FlowAccumulation.tif')
+    raster = arcpy.Raster(os.path.abspath(in_file))
+    out_file = '%s/%s' % (workspace, 're_FlowAccumulation.tif')
+    outCon = arcpy.sa.Con(raster, 1, where_clause="VALUE > 0")
+    outCon.save(out_file)
+
+
 def process_road(workspace, shp_path, field, cell_size=10, mask=None,
                  masked_shp_name='masked_dem'):
 
@@ -74,14 +87,16 @@ def process_road(workspace, shp_path, field, cell_size=10, mask=None,
             out_path = '%s/%s%s' % (workspace, masked_shp_name, '.tif')
             out_mask = arcpy.Clip_analysis(shp_path, mask, 'in_memory/tmp')
             raster = arcpy.PolygonToRaster_conversion("in_memory/tmp", field,
-                                                      out_path)
+                                                      out_path,
+                                                      cellsize=cell_size)
             outCon = arcpy.sa.Con(arcpy.Raster(out_path), 1)
             out_path = '%s/%s%s%s' % (workspace, 're_', masked_shp_name, '.tif')
             outCon.save(out_path)
         else:
             out_path = '%s/%s' % (workspace, masked_shp_name)
             raster = arcpy.PolygonToRaster_conversion("in_memory/tmp", field,
-                                                      out_path)
+                                                      out_path,
+                                                      cellsize=cell_size)
             outCon = arcpy.sa.Con(arcpy.Raster(out_path), 1)
             out_path = '%s/%s%s' % (workspace, 're_', masked_shp_name)
             outCon.save(out_path)
@@ -89,7 +104,8 @@ def process_road(workspace, shp_path, field, cell_size=10, mask=None,
         out_path = '%s/%s' % (workspace, os.path.basename(
             shp_path))
         raster = arcpy.PolygonToRaster_conversion("in_memory/tmp", field,
-                                                  out_path)
+                                                  out_path,
+                                                  cellsize=cell_size)
         outCon = arcpy.sa.Con(arcpy.Raster(out_path), 1)
         out_path = '%s/%s%s' % (workspace, 're_', os.path.basename(
             shp_path))
